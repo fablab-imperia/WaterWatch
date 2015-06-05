@@ -1,3 +1,5 @@
+<?php
+
 /*//////////////////////////////////////////////////////////////////////////////
                     __      __         __
                    /  \    /  \_____ _/  |_  ___________
@@ -21,9 +23,7 @@
   project: WaterWatcher
   author: Andrea Cazzadori (mrwolf.fablabimperia.org)
   license: WTFPL
-  file: station/waterwatcher.ino
-  modified: 2015/06/02 - 14:29:42
-  header created: 2015/06/02 - 16:17:07
+  file: server/thingspeak.php
 ________________________________________________________________________________
 
               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
@@ -53,81 +53,99 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //////////////////////////////////////////////////////////////////////////////*/
 
-#include <Arduino.h>
-#include <SoftwareSerial.h>
-#include "LowPower.h"
+namespace waterwatch;
 
-#include "cfg.h"
-#include "dbg.h"
-#include "log.h"
-#include "clock.h"
-#include "sim900.h"
-#include "device.h"
+class ThingSpeakClient {
 
-#define EXIT  {Serial.flush( );abort( );}
+  //Add you magic api key: es. MAGICKEY
+  const  THING_SPEAK_MAGIC_APIKEY = "MAGICKEY";
+  //Thingspeak url
+  const  THINGSPEAK_UPDATE_URL = "https://api.thingspeak.com/update";
 
-void sleep( );
+  //Utility function: performs an HTTP post using CURL library
+  private static function postDataWithCurl($url, $params) {
 
-void setup( )
-{
-    Serial.begin( CFG_SERIAL_SPEED );
-    DBGLN( "program started" );
-}
+    $retVal = array("code" => 0, "msg" => "Ok", "http_code" => "N/A", "reponseText" => "N/A");
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL,$url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
 
-void loop( )
-{
-    static Clock ck;
 
-    sleep( );
+    //Curl is a strange thing: here we choose to do a post and set fields
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 
-	delay( 200 );
+    $data = curl_exec($ch);
+    $curl_error_code = curl_errno($ch);
+    $http_code = curl_getinfo ( $ch, CURLINFO_HTTP_CODE );
 
-#if CFG_SENSOR_SONAR_ENABLED == true
-    SensorSonar::update( );
-#endif
+    $retVal['http_code'] = $http_code;
 
-#if CFG_SENSOR_TEMPERATURE_ENABLED == true
-    SensorTemperature::update( );
-#endif
+    if ($curl_error_code) {
 
-#if CFG_SENSOR_BATTERY_VOLTAGE_ENABLED == true
-    SensorBatteryVoltage::update( );
-#endif
+        $retVal['code'] = $curl_error_code;
+        $retVal['msg'] = "Error: " . curl_error($ch);
 
-    // log data (if needed)
-    logData( );
+    } else {
+        $retVal['reponseText'] = $data;
 
-    DBG( "time [s]: " );
-    DBGLN( ck.seconds( ) );
+    }
+    curl_close($ch);
 
-}
+    return $retVal;
+  }
 
-/*
-==========================
-put AVR ATMega in sleep mode
-==========================
-*/
+  //post fields to thingspeak platform
+  public static function postToThingSpeak(array $data) {
 
-void sleep( )
-{
-    // flush serial before entering sleep mode
-    #if CFG_DEBUG == true
-	Serial.flush( );
-	#endif
+      $params = array(
+        'api_key' => self::THING_SPEAK_MAGIC_APIKEY,
+        'timezone' => 'Europe/Rome'
+      );
 
-    // add global offset to all clocks
-    Clock::offset( 8000 );
 
-    // idle mode
-    LowPower.idle
-    (
-        SLEEP_8S,
-        ADC_OFF,
-        TIMER2_OFF,
-        TIMER1_OFF,
-        TIMER0_OFF,
-        SPI_OFF,
-        USART0_OFF,
-        TWI_OFF
-    );
+      if (array_key_exists('rain', $data)) {
+        $params['field1'] = $data['rain'];
+      }
+
+
+      if (array_key_exists('sonarAvg', $data)) {
+        $params['field3'] = $data['sonarAvg'];
+      }
+
+
+      if (array_key_exists('tempAvg', $data)) {
+        $params['field5'] = $data['tempAvg'];
+      }
+
+      if (array_key_exists('voltageAvg', $data)) {
+        $params['field6'] = $data['voltageAvg'];
+      }
+
+      if (array_key_exists('chargePerc', $data)) {
+        $params['field2'] = $data['chargePerc'];
+      }
+
+      if (array_key_exists('remainingHours', $data)) {
+        $params['field4'] = $data['remainingHours'];
+      }
+
+      if (array_key_exists('created_at', $data)) {
+        $params['created_at'] = $data['created_at'];
+      } else {
+        $now = date("Y-m-d H:i:s");
+        $params['created_at'] = $now;
+      }
+
+
+      $result = self::postDataWithCurl(self::THINGSPEAK_UPDATE_URL, $params);
+
+      if ($result['reponseText'] == '0') {
+        $result['reponseText'] = 'update failed';
+      }
+      return   $result;
+
+  }
+
 }

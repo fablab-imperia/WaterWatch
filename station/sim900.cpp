@@ -1,31 +1,31 @@
 /*//////////////////////////////////////////////////////////////////////////////
-                    __      __         __                       
-                   /  \    /  \_____ _/  |_  ___________        
-                   \   \/\/   /\__  \\   __\/ __ \_  __ \       
-                    \        /  / __ \|  | \  ___/|  | \/       
-                     \__/\  /  (____  /__|  \___  >__|          
-                          \/        \/          \/              
-             __      __         __         .__                  
-            /  \    /  \_____ _/  |_  ____ |  |__   ___________ 
+                    __      __         __
+                   /  \    /  \_____ _/  |_  ___________
+                   \   \/\/   /\__  \\   __\/ __ \_  __ \
+                    \        /  / __ \|  | \  ___/|  | \/
+                     \__/\  /  (____  /__|  \___  >__|
+                          \/        \/          \/
+             __      __         __         .__
+            /  \    /  \_____ _/  |_  ____ |  |__   ___________
             \   \/\/   /\__  \\   __\/ ___\|  |  \_/ __ \_  __ \
              \        /  / __ \|  | \  \___|   Y  \  ___/|  | \/
-              \__/\  /  (____  /__|  \___  >___|  /\___  >__|   
-                   \/        \/          \/     \/     \/       
-                      _______________  ____ .________           
-                      \_____  \   _  \/_   ||   ____/           
-                       /  ____/  /_\  \|   ||____  \            
-                      /       \  \_/   \   |/       \           
-                      \_______ \_____  /___/______  /           
-                              \/     \/           \/          
-                   
+              \__/\  /  (____  /__|  \___  >___|  /\___  >__|
+                   \/        \/          \/     \/     \/
+                      _______________  ____ .________
+                      \_____  \   _  \/_   ||   ____/
+                       /  ____/  /_\  \|   ||____  \
+                      /       \  \_/   \   |/       \
+                      \_______ \_____  /___/______  /
+                              \/     \/           \/
+
   project: WaterWatcher
   author: Andrea Cazzadori (mrwolf.fablabimperia.org)
   license: WTFPL
-  file: waterwatcher/sim900.cpp
+  file: station/sim900.cpp
   modified: 2015/06/02 - 15:01:22
   header created: 2015/06/02 - 16:17:07
-________________________________________________________________________________  
-  
+________________________________________________________________________________
+
               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
                     Version 2, December 2004
 
@@ -41,15 +41,15 @@ ________________________________________________________________________________
   0. You just DO WHAT THE FUCK YOU WANT TO.
 ________________________________________________________________________________
 
-THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED WARRANTIES, 
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND 
-FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS 
-OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
-OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; BUSINESS 
-INTERRUPTION; OR INJURIES, DEATHS OR DAMAGE TO PROPERTIES) HOWEVER CAUSED AND ON 
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESSED OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; BUSINESS
+INTERRUPTION; OR INJURIES, DEATHS OR DAMAGE TO PROPERTIES) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //////////////////////////////////////////////////////////////////////////////*/
 
@@ -64,7 +64,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // temporary buffer used to create the message
 #define TMP_BUF_SIZE 256
 
-// software serial used for SIMCOM900 I/O and AT commands 
+// software serial used for SIMCOM900 I/O and AT commands
 static SoftwareSerial _swser( CFG_SIM900_SWPIN1, CFG_SIM900_SWPIN2 );
 static char _buf[ CFG_SIM900_BUFFER_CAPACITY + 1 ]; // + 1 null byte
 static sizet _bufsz = 0;
@@ -97,10 +97,10 @@ static void at( char const * com,
                 int tdelay,
                 bool readsw = true );
 
-// read back serial data OUTPUT 
+// read back serial data OUTPUT
 static void readSerialData( );
-                
-                
+
+
 /*
 ========================================
 pwrPinWrite
@@ -147,9 +147,9 @@ csq
 int SIM900::csq( )
 {
 	assume( pwr( ) );
-	
+
 	char const * p = NULL;
-	
+
 	for( int i = 0; i < 5; ++i )
 	{
 		// verify status
@@ -157,7 +157,7 @@ int SIM900::csq( )
 
 		// check server response
 		p = strstr( _buf, "+CSQ:" );
-			
+
 		if( NULL != p )
 		{
 			p += 6;
@@ -167,8 +167,8 @@ int SIM900::csq( )
 		}
 		delay( 1000 );
 	}
-    
-	return 0;    
+
+	return 0;
 }
 
 /*

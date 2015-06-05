@@ -21,7 +21,7 @@
   project: WaterWatcher
   author: Andrea Cazzadori (mrwolf.fablabimperia.org)
   license: WTFPL
-  file: waterwatcher/cfg.h
+  file: station/cfg.h
   modified: 2015/06/02 - 16:08:38
   header created: 2015/06/02 - 16:17:07
 ________________________________________________________________________________

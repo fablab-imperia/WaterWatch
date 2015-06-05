@@ -21,7 +21,7 @@
   project: WaterWatcher
   author: Andrea Cazzadori (mrwolf.fablabimperia.org)
   license: WTFPL
-  file: waterwatcher/sensor_battery_voltage.cpp
+  file: station/sensor_battery_voltage.cpp
   modified: 2015/06/02 - 15:48:36
   header created: 2015/06/02 - 16:17:07
 ________________________________________________________________________________
